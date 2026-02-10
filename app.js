@@ -519,7 +519,9 @@ async function fetchRates(base = 'USD') {
             console.log('Turkish gold API not available, using conversion:', error);
         }
 
-        const usdToTry = currentRates['TRY'] || 34.5;
+        const usdToTry = (currentRates && currentRates['TRY']) ? currentRates['TRY'] : 34.5;
+        const usdToSyp = (currentRates && currentRates['SYP']) ? getSYPRate(currentRates['SYP']) : getSYPRate(0.000113);
+
         const usdToSyp = getSYPRate(currentRates['SYP'] || 0.000113);
 
         const spreadFactor = spreadPercent / 100;
@@ -564,20 +566,30 @@ async function fetchRates(base = 'USD') {
         const savedGold = localStorage.getItem('lastGoldPrices');
         const savedTurkish = localStorage.getItem('lastTurkishGold');
         
-        if (savedGold) {
-            goldPrices = JSON.parse(savedGold);
-            const turkishGoldPrices = savedTurkish ? JSON.parse(savedTurkish) : null;
-            
-            const usdToTry = currentRates['TRY'] || 34.5;
-            const usdToSyp = getSYPRate(currentRates['SYP'] || 0.000113);
-            const spreadFactor = spreadPercent / 100;
-            const goldContainer = document.getElementById('goldContainer');
+if (savedGold) {
+    try {
+        goldPrices = JSON.parse(savedGold);
+        turkishGoldPrices = savedTurkish ? JSON.parse(savedTurkish) : null;
+    } catch(e) {
+        console.error('Failed to parse saved gold prices:', e);
+        goldPrices = {};
+        turkishGoldPrices = {};
+    }
 
-            const tryGold24 = turkishGoldPrices ? turkishGoldPrices[24] : goldPrices[24] * usdToTry;
-            const tryGold21 = turkishGoldPrices ? turkishGoldPrices[21] : goldPrices[21] * usdToTry;
-            const tryGold18 = turkishGoldPrices ? turkishGoldPrices[18] : goldPrices[18] * usdToTry;
+    const usdToTry = (currentRates && currentRates['TRY']) ? currentRates['TRY'] : 34.5;
+    const usdToSyp = (currentRates && currentRates['SYP']) ? getSYPRate(currentRates['SYP']) : getSYPRate(0.000113);
+    const spreadFactor = spreadPercent / 100;
+    const goldContainer = document.getElementById('goldContainer');
 
-            goldContainer.innerHTML = `
+    const tryGold24 = turkishGoldPrices ? turkishGoldPrices[24] : goldPrices[24] * usdToTry;
+    const tryGold21 = turkishGoldPrices ? turkishGoldPrices[21] : goldPrices[21] * usdToTry;
+    const tryGold18 = turkishGoldPrices ? turkishGoldPrices[18] : goldPrices[18] * usdToTry;
+
+    goldContainer.innerHTML = `
+        ...
+    `;
+}
+
                 <div class="gold-section">
                     <div class="gold-section-title">${SYRIAN_FLAG_SVG} سوريا <span style="color: var(--warning); font-size: 0.7rem;">(محفوظ)</span></div>
                     ${createGoldItem('ذهب 24 قيراط', '💎', goldPrices[24] * usdToSyp, spreadFactor, 'ل.س', true)}
