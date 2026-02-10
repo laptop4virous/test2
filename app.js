@@ -560,20 +560,20 @@ async function fetchRates(base = 'USD') {
         localStorage.setItem('lastTurkishGold', JSON.stringify(turkishGoldPrices));
         
     } catch (e) {
-        console.error('Gold fetch error:', e);
-        
-        // استخدام آخر أسعار محفوظة
-        const savedGold = localStorage.getItem('lastGoldPrices');
-        const savedTurkish = localStorage.getItem('lastTurkishGold');
-        
-if (savedGold) {
+    console.error('Gold fetch error:', e);
+
+    // استخدام آخر أسعار محفوظة
+    const savedGold = localStorage.getItem('lastGoldPrices');
+    const savedTurkish = localStorage.getItem('lastTurkishGold');
+
+    goldPrices = {};
+    turkishGoldPrices = {};
+
     try {
-        goldPrices = JSON.parse(savedGold);
-        turkishGoldPrices = savedTurkish ? JSON.parse(savedTurkish) : null;
-    } catch(e) {
-        console.error('Failed to parse saved gold prices:', e);
-        goldPrices = {};
-        turkishGoldPrices = {};
+        if (savedGold) goldPrices = JSON.parse(savedGold);
+        if (savedTurkish) turkishGoldPrices = JSON.parse(savedTurkish);
+    } catch (parseError) {
+        console.error('Failed to parse saved gold prices:', parseError);
     }
 
     const usdToTry = (currentRates && currentRates['TRY']) ? currentRates['TRY'] : 34.5;
@@ -581,39 +581,34 @@ if (savedGold) {
     const spreadFactor = spreadPercent / 100;
     const goldContainer = document.getElementById('goldContainer');
 
-    const tryGold24 = turkishGoldPrices ? turkishGoldPrices[24] : goldPrices[24] * usdToTry;
-    const tryGold21 = turkishGoldPrices ? turkishGoldPrices[21] : goldPrices[21] * usdToTry;
-    const tryGold18 = turkishGoldPrices ? turkishGoldPrices[18] : goldPrices[18] * usdToTry;
+    const tryGold24 = turkishGoldPrices[24] || goldPrices[24] * usdToTry;
+    const tryGold21 = turkishGoldPrices[21] || goldPrices[21] * usdToTry;
+    const tryGold18 = turkishGoldPrices[18] || goldPrices[18] * usdToTry;
 
     goldContainer.innerHTML = `
-        ...
+        <div class="gold-section">
+            <div class="gold-section-title">${SYRIAN_FLAG_SVG} سوريا <span style="color: var(--warning); font-size: 0.7rem;">(محفوظ)</span></div>
+            ${createGoldItem('ذهب 24 قيراط', '💎', goldPrices[24] * usdToSyp, spreadFactor, 'ل.س', true)}
+            ${createGoldItem('ذهب 21 قيراط', '✨', goldPrices[21] * usdToSyp, spreadFactor, 'ل.س', true)}
+            ${createGoldItem('ذهب 18 قيراط', '⭐', goldPrices[18] * usdToSyp, spreadFactor, 'ل.س', true)}
+        </div>
+
+        <div class="gold-section">
+            <div class="gold-section-title">🇹🇷 تركيا <span style="color: var(--warning); font-size: 0.7rem;">(محفوظ)</span></div>
+            ${createGoldItem('ذهب 24 قيراط', '💎', tryGold24, spreadFactor, 'TRY', false)}
+            ${createGoldItem('ذهب 21 قيراط', '✨', tryGold21, spreadFactor, 'TRY', false)}
+            ${createGoldItem('ذهب 18 قيراط', '⭐', tryGold18, spreadFactor, 'TRY', false)}
+        </div>
+
+        <div class="gold-section">
+            <div class="gold-section-title">🌍 عالمي (بالدولار) <span style="color: var(--warning); font-size: 0.7rem;">(محفوظ)</span></div>
+            ${createGoldItem('أونصة الذهب', '🥇', goldPrices.oz, spreadFactor, 'USD', false, true)}
+            ${createGoldItem('ذهب 24 قيراط', '💎', goldPrices[24], spreadFactor, 'USD/غرام', false, true)}
+            ${createGoldItem('ذهب 21 قيراط', '✨', goldPrices[21], spreadFactor, 'USD/غرام', false, true)}
+        </div>
     `;
 }
 
-                <div class="gold-section">
-                    <div class="gold-section-title">${SYRIAN_FLAG_SVG} سوريا <span style="color: var(--warning); font-size: 0.7rem;">(محفوظ)</span></div>
-                    ${createGoldItem('ذهب 24 قيراط', '💎', goldPrices[24] * usdToSyp, spreadFactor, 'ل.س', true)}
-                    ${createGoldItem('ذهب 21 قيراط', '✨', goldPrices[21] * usdToSyp, spreadFactor, 'ل.س', true)}
-                    ${createGoldItem('ذهب 18 قيراط', '⭐', goldPrices[18] * usdToSyp, spreadFactor, 'ل.س', true)}
-                </div>
-
-                <div class="gold-section">
-                    <div class="gold-section-title">🇹🇷 تركيا <span style="color: var(--warning); font-size: 0.7rem;">(محفوظ)</span></div>
-                    ${createGoldItem('ذهب 24 قيراط', '💎', tryGold24, spreadFactor, 'TRY', false)}
-                    ${createGoldItem('ذهب 21 قيراط', '✨', tryGold21, spreadFactor, 'TRY', false)}
-                    ${createGoldItem('ذهب 18 قيراط', '⭐', tryGold18, spreadFactor, 'TRY', false)}
-                </div>
-
-                <div class="gold-section">
-                    <div class="gold-section-title">🌍 عالمي (بالدولار) <span style="color: var(--warning); font-size: 0.7rem;">(محفوظ)</span></div>
-                    ${createGoldItem('أونصة الذهب', '🥇', goldPrices.oz, spreadFactor, 'USD', false, true)}
-                    ${createGoldItem('ذهب 24 قيراط', '💎', goldPrices[24], spreadFactor, 'USD/غرام', false, true)}
-                    ${createGoldItem('ذهب 21 قيراط', '✨', goldPrices[21], spreadFactor, 'USD/غرام', false, true)}
-                </div>
-            `;
-        }
-    }
-}
 
 function createGoldItem(name, icon, price, spread, unit, isSYP = false, isDollar = false) {
     const buy = price * (1 - spread);
